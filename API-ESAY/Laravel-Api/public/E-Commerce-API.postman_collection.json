@@ -1,0 +1,1553 @@
+{
+    "info": {
+        "_postman_id": "2d37dd13-d546-4120-b366-d3b1d6741d3e",
+        "name": "E-Commerce API - Complete Collection",
+        "description": "Complete API collection for E-Commerce Laravel application with Sanctum authentication.\n\n**Base URL:** http://127.0.0.1:8000/api/v1\n\n**Authentication:** Bearer Token (Sanctum)\n\n**Features:**\n- User Authentication (Register, Login, Logout, Update, Delete)\n- Products Management (Owner only) - 6 endpoints\n- Admin Products (Admin role only) - 6 endpoints\n- Categories Management (Owner only) - 6 endpoints\n- Orders Management (Create, View, Update, Cancel, Delete) - 6 endpoints\n\n**Role IDs:**\n- Owner: 1 (Manages main catalog & categories)\n- Admin: 2 (Manages own products)\n- Customer: 3 (Can place orders)",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+        "_exporter_id": "46173271",
+        "_collection_link": "https://speeding-resonance-719640.postman.co/workspace/My-Workspace~a5e1758e-7fc1-4659-8c10-780c512d38c4/collection/46173271-2d37dd13-d546-4120-b366-d3b1d6741d3e?action=share&source=collection_link&creator=46173271"
+    },
+    "item": [
+        {
+            "name": "Authentication",
+            "item": [
+                {
+                    "name": "Register User",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"auth_token\", jsonData.token);",
+                                    "    pm.environment.set(\"user_id\", jsonData.data.id);",
+                                    "    console.log(\"Token saved:\", jsonData.token);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Ahmed Hassan",
+                                    "description": "User's full name (required)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "ahmed@example.com",
+                                    "description": "Valid email address (required, unique)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "phone",
+                                    "value": "01234567890",
+                                    "description": "Phone number 10-20 chars (required, unique)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "SecurePass123",
+                                    "description": "Password min 8 chars (required)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "password_confirmation",
+                                    "value": "SecurePass123",
+                                    "description": "Must match password (required)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image_path",
+                                    "description": "Profile picture (optional, max 2MB, jpg/jpeg/png/webp)",
+                                    "type": "file",
+                                    "src": []
+                                },
+                                {
+                                    "key": "role_id",
+                                    "value": "3",
+                                    "description": "Role assignment (optional, Owner only)",
+                                    "type": "text",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/register",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "register"
+                            ]
+                        },
+                        "description": "Register a new user account.\n\n**Required Fields:**\n- name\n- email (unique)\n- phone (10-20 chars, unique)\n- password\n- password_confirmation\n\n**Optional:**\n- image_path (file, max 2MB)\n- role_id (Owner only)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 200) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"auth_token\", jsonData.token);",
+                                    "    pm.environment.set(\"user_id\", jsonData.data.id);",
+                                    "    pm.environment.set(\"user_role_id\", jsonData.data.role_id);",
+                                    "    console.log(\"Login successful. Token saved.\");",
+                                    "}"
+                                ],
+                                "type": "text/javascript",
+                                "packages": {},
+                                "requests": {}
+                            }
+                        }
+                    ],
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"email\": \"admin@example.com\",\n    \"password\": \"SecurePass123\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/login",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "login"
+                            ]
+                        },
+                        "description": "Authenticate user and receive Bearer token.\n\n**Rate Limit:** 10 attempts per 5 minutes\n\n**Required:**\n- email\n- password"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update User Profile",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Ahmed Updated",
+                                    "description": "Updated name (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "email",
+                                    "value": "ahmed.new@example.com",
+                                    "description": "Updated email (optional, must be unique)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "phone",
+                                    "value": "01987654321",
+                                    "description": "Updated phone (optional, must be unique)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "password",
+                                    "value": "NewPassword123",
+                                    "description": "New password (optional, requires confirmation)",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "password_confirmation",
+                                    "value": "NewPassword123",
+                                    "description": "Required if password is provided",
+                                    "type": "text",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "image_path",
+                                    "description": "New profile picture (optional, max 2MB)",
+                                    "type": "file",
+                                    "src": [],
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/update",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "update"
+                            ]
+                        },
+                        "description": "Update authenticated user's profile.\n\n**All fields optional** - send only what needs to be updated.\n\n**Note:** If updating password, password_confirmation is required."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Logout",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/logout",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "logout"
+                            ]
+                        },
+                        "description": "Revoke current authentication token."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete User Account",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/deleteUser",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "deleteUser"
+                            ]
+                        },
+                        "description": "Permanently delete the authenticated user's account.\n\n⚠️ **Warning:** This action cannot be undone."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "User authentication and profile management endpoints."
+        },
+        {
+            "name": "Products (Main Catalog)",
+            "item": [
+                {
+                    "name": "Get All Products",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products?search=",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "description": "Search in name, sku, description ,price"
+                                },
+                                {
+                                    "key": "",
+                                    "value": "",
+                                    "description": "Filter by category ID",
+                                    "disabled": true
+                                },
+                                {
+                                    "key": "",
+                                    "value": "",
+                                    "description": "Minimum price filter",
+                                    "disabled": true
+                                }
+                            ]
+                        },
+                        "description": "Retrieve all products with optional filters and sorting.\n\n**Query Parameters (all optional):**\n- search\n- category_id\n- min_price / max_price\n- is_active\n- sort_by / sort_direction"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Product by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieve a single product by ID.\n\n**Auth:** Required\n\n**Returns:** Product details with category information"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Product (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Premium T-Shirt",
+                                    "description": "Product name (required, max 255)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "High quality cotton t-shirt",
+                                    "description": "Product description (required)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "29.99",
+                                    "description": "Product price (required, min 0)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "stock",
+                                    "value": "100",
+                                    "description": "Stock quantity (required, min 0)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "sku",
+                                    "value": "TSHIRT-001",
+                                    "description": "Stock keeping unit (optional, unique)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "1",
+                                    "description": "Category ID (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "is_active",
+                                    "value": "1",
+                                    "description": "Active status (optional, default 1)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "is_featured",
+                                    "value": "1",
+                                    "description": "Featured status (optional, default 1)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image_url",
+                                    "description": "Product image (optional, max 2MB)",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products"
+                            ]
+                        },
+                        "description": "Create a new product in main catalog.\n\n**Permission:** Owner only (role_id = 1)\n\n**Required:**\n- name\n- description\n- price\n- stock"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Product (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Premium T-Shirt Updated",
+                                    "description": "Updated name (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "34.99",
+                                    "description": "Updated price (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "stock",
+                                    "value": "150",
+                                    "description": "Updated stock (optional)",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Update existing product.\n\n**Permission:** Owner only (role_id = 1)\n\n**All fields optional** - send only what needs updating."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Product (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Product ID to delete"
+                                }
+                            ]
+                        },
+                        "description": "Delete a single product.\n\n**Permission:** Owner only (role_id = 1)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete All Products (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/products/DeleteAll/delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "products",
+                                "DeleteAll",
+                                "delete"
+                            ]
+                        },
+                        "description": "Delete all products from main catalog.\n\n**Permission:** Owner only (role_id = 1)\n\n⚠️ **Warning:** This deletes ALL products!"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Main product catalog management (Owner only)."
+        },
+        {
+            "name": "Admin Products",
+            "item": [
+                {
+                    "name": "Get Admin Products",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/admin-products?search=",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-products"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "description": "Search in products (optional)"
+                                }
+                            ]
+                        },
+                        "description": "Get admin's own products.\n\n**Permission:** Admin only (role_id = 2)\n\n**Note:** Shows only products created by the authenticated admin."
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Admin Product by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/admin-products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Admin Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieve a single admin product by ID.\n\n**Permission:** Admin only (role_id = 2)\n\n**Note:** Can only view own products"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Admin Product",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Admin Special Product",
+                                    "description": "Product name (required, max 255)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "49.99",
+                                    "description": "Product price (required, min 0)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "description",
+                                    "value": "Special product managed by admin",
+                                    "description": "Product description (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "sku",
+                                    "value": "ADMIN-001",
+                                    "description": "SKU (optional, unique in admin_products)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "stock",
+                                    "value": "50",
+                                    "description": "Stock quantity (optional, default 0)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "category_id",
+                                    "value": "1",
+                                    "description": "Category ID (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "is_active",
+                                    "value": "1",
+                                    "description": "Active status (optional, default 1)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "is_featured",
+                                    "value": "0",
+                                    "description": "Featured status (optional, default 0)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "image_url",
+                                    "description": "Product image (optional, max 2MB)",
+                                    "type": "file",
+                                    "src": []
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin-products",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-products"
+                            ]
+                        },
+                        "description": "Create a new admin product.\n\n**Permission:** Admin only (role_id = 2)\n\n**Required:**\n- name\n- price"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Admin Product",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "formdata",
+                            "formdata": [
+                                {
+                                    "key": "name",
+                                    "value": "Admin Product Updated",
+                                    "description": "Updated name (optional)",
+                                    "type": "text"
+                                },
+                                {
+                                    "key": "price",
+                                    "value": "59.99",
+                                    "description": "Updated price (optional)",
+                                    "type": "text"
+                                }
+                            ]
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/admin-products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Admin Product ID"
+                                }
+                            ]
+                        },
+                        "description": "Update admin product.\n\n**Permission:** Admin only (can only update own products)\n\n**All fields optional**"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Admin Product",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/admin-products/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-products",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Admin Product ID to delete"
+                                }
+                            ]
+                        },
+                        "description": "Delete admin product.\n\n**Permission:** Admin only (can only delete own products)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete All Admin Products",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/admin-products/DeleteAll/delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "admin-products",
+                                "DeleteAll",
+                                "delete"
+                            ]
+                        },
+                        "description": "Delete all admin's own products.\n\n**Permission:** Admin only\n\n⚠️ **Note:** Deletes only the authenticated admin's products."
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Admin-specific product management (Admin role only)."
+        },
+        {
+            "name": "Categories",
+            "item": [
+                {
+                    "name": "Get All Categories",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/category?search=",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "category"
+                            ],
+                            "query": [
+                                {
+                                    "key": "search",
+                                    "value": "",
+                                    "description": "Search in name or ID (optional)"
+                                }
+                            ]
+                        },
+                        "description": "Retrieve all categories.\n\n**Query Parameters:**\n- search (optional)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Category by ID",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/category/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "category",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Category ID"
+                                }
+                            ]
+                        },
+                        "description": "Retrieve a single category by ID.\n\n**Auth:** Required\n\n**Returns:** Category details"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Category (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Electronics\",\n    \"description\": \"Electronic devices and accessories\",\n    \"is_active\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/category",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "category"
+                            ]
+                        },
+                        "description": "Create a new category.\n\n**Permission:** Owner only (role_id = 1)\n\n**Required:**\n- name (unique)\n\n**Optional:**\n- description\n- is_active (default 1)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Category (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"name\": \"Electronics Updated\",\n    \"description\": \"All electronic devices and accessories\",\n    \"is_active\": 1\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/category/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "category",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Category ID"
+                                }
+                            ]
+                        },
+                        "description": "Update existing category.\n\n**Permission:** Owner only (role_id = 1)\n\n**All fields optional**"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Category (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/category/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "category",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "1",
+                                    "description": "Category ID to delete"
+                                }
+                            ]
+                        },
+                        "description": "Delete a category.\n\n**Permission:** Owner only (role_id = 1)"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete All Categories (Owner Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/category/DeleteAll/delete",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "category",
+                                "DeleteAll",
+                                "delete"
+                            ]
+                        },
+                        "description": "Delete all categories.\n\n**Permission:** Owner only (role_id = 1)\n\n⚠️ **Warning:** This deletes ALL categories!"
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Category management endpoints."
+        },
+        {
+            "name": "Orders",
+            "item": [
+                {
+                    "name": "Get All Orders",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/orders",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders"
+                            ]
+                        },
+                        "description": "Get orders list.\n\n**Permissions:**\n- Regular users: see only own orders\n- Super Admin: see all orders"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Create Order",
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "if (pm.response.code === 201) {",
+                                    "    const jsonData = pm.response.json();",
+                                    "    pm.environment.set(\"order_id\", jsonData.order.id);",
+                                    "    console.log(\"Order created with ID:\", jsonData.order.id);",
+                                    "}"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"product_id\": 1,\n    \"quantity\": 2,\n    \"notes\": \"Please gift wrap this order\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/orders",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders"
+                            ]
+                        },
+                        "description": "Create a new order.\n\n**Required:**\n- product_id (must exist)\n- quantity (min 1)\n\n**Optional:**\n- notes\n\n**Automatic:**\n- Generates order_number\n- Calculates total_amount\n- Decreases product stock\n- Creates order_item"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Single Order",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "GET",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/orders/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{order_id}}",
+                                    "description": "Order ID"
+                                }
+                            ]
+                        },
+                        "description": "Get order details.\n\n**Permissions:**\n- Order owner can view\n- Super Admin can view any"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Order (Super Admin Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            },
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"status\": \"processing\",\n    \"notes\": \"Order is being prepared for shipment\"\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        },
+                        "url": {
+                            "raw": "{{base_url}}/orders/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{order_id}}",
+                                    "description": "Order ID"
+                                }
+                            ]
+                        },
+                        "description": "Update order status.\n\n**Permission:** Super Admin only\n\n**Optional Fields:**\n- status (pending|processing|completed|cancelled)\n- notes"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Order (Super Admin Only)",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "DELETE",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/orders/:id",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ":id"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": "{{order_id}}",
+                                    "description": "Order ID to delete"
+                                }
+                            ]
+                        },
+                        "description": "Delete an order.\n\n**Permission:** Super Admin only"
+                    },
+                    "response": []
+                },
+                {
+                    "name": "cancel order",
+                    "request": {
+                        "auth": {
+                            "type": "bearer",
+                            "bearer": [
+                                {
+                                    "key": "token",
+                                    "value": "{{auth_token}}",
+                                    "type": "string"
+                                }
+                            ]
+                        },
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Accept",
+                                "value": "application/json",
+                                "type": "text"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{base_url}}/orders/:id/cancel",
+                            "host": [
+                                "{{base_url}}"
+                            ],
+                            "path": [
+                                "orders",
+                                ":id",
+                                "cancel"
+                            ],
+                            "variable": [
+                                {
+                                    "key": "id",
+                                    "value": ""
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ],
+            "description": "Order management endpoints."
+        }
+    ],
+    "event": [
+        {
+            "listen": "prerequest",
+            "script": {
+                "type": "text/javascript",
+                "requests": {},
+                "exec": [
+                    ""
+                ]
+            }
+        },
+        {
+            "listen": "test",
+            "script": {
+                "type": "text/javascript",
+                "requests": {},
+                "exec": [
+                    ""
+                ]
+            }
+        }
+    ],
+    "variable": [
+        {
+            "key": "base_url",
+            "value": "http://127.0.0.1:8000/api/v1"
+        },
+        {
+            "key": "auth_token",
+            "value": ""
+        },
+        {
+            "key": "order_id",
+            "value": ""
+        }
+    ]
+}
