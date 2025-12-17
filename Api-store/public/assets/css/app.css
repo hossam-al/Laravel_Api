@@ -1,0 +1,60 @@
+body {
+    font-family: 'Cairo', sans-serif;
+    background: #f6f7fb;
+    margin: 0;
+    color: #222;
+}
+
+
+header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 24px;
+}
+
+a {
+    color: #2563eb;
+    text-decoration: none;
+}
+
+.card {
+    background: #fff;
+    border-radius: 12px;
+    padding: 18px;
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.06);
+}
+
+input,
+button,
+select {
+    font-family: inherit;
+    font-size: 16px;
+    padding: 10px 12px;
+    border-radius: 8px;
+    border: 1px solid #ddd;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+button {
+    background: #2563eb;
+    color: #fff;
+    cursor: pointer;
+    border: none;
+}
+
+.row {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+}
+
+.nav a {
+    margin-inline-start: 12px;
+}
+
+.error {
+    color: #b91c1c;
+    font-size: 14px;
+}
